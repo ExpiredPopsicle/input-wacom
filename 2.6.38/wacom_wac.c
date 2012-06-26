@@ -324,11 +324,6 @@ static int wacom_intuos_inout(struct wacom_wac *wacom)
 		if (features->type >= INTUOS5S && features->type <= INTUOS5L)
 			wacom->shared->stylus_in_proximity = true;
 
-		/* serial number of the tool */
-		wacom->serial[idx] = ((data[3] & 0x0f) << 28) +
-			(data[4] << 20) + (data[5] << 12) +
-			(data[6] << 4) + (data[7] >> 4);
-
 		wacom->id[idx] = (data[2] << 4) | (data[3] >> 4) |
 			((data[7] & 0x0f) << 20) | ((data[8] & 0xf0) << 12);
 
@@ -400,6 +395,17 @@ static int wacom_intuos_inout(struct wacom_wac *wacom)
 			break;
 		}
 		return 1;
+	}
+
+	/* serial number of the tool */
+	if (data[1] & 0x02) {
+		wacom->serial[idx] = ((data[3] & 0x0f) << 28) +
+			(data[4] << 20) + (data[5] << 12) +
+			(data[6] << 4) + (data[7] >> 4);
+
+	}
+	else {
+		wacom->serial[idx] = wacom->tool[idx];
 	}
 
 	/* older I4 styli don't work with new Cintiqs */
