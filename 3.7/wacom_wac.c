@@ -1018,8 +1018,9 @@ static int wacom_tpc_mt_touch(struct wacom_wac *wacom)
 	for (i = 0; i < 2; i++) {
 		int p = data[1] & (1 << i);
 		bool touch = p && !wacom->shared->stylus_in_proximity;
+		int slot = input_mt_get_slot_by_key(input, i);
 
-		input_mt_slot(input, i);
+		input_mt_slot(input, slot);
 		input_mt_report_slot_state(input, MT_TOOL_FINGER, touch);
 		if (touch) {
 			int x = le16_to_cpup((__le16 *)&data[i * 2 + 2]) & 0x7fff;
@@ -1156,6 +1157,7 @@ static int wacom_bpt_touch(struct wacom_wac *wacom)
 	for (i = 0; i < 2; i++) {
 		int offset = (data[1] & 0x80) ? (8 * i) : (9 * i);
 		bool touch = data[offset + 3] & 0x80;
+		int slot = input_mt_get_slot_by_key(input, i);
 
 		/*
 		 * Touch events need to be disabled while stylus is
@@ -1165,7 +1167,7 @@ static int wacom_bpt_touch(struct wacom_wac *wacom)
 		 */
 		touch = touch && !wacom->shared->stylus_in_proximity;
 
-		input_mt_slot(input, i);
+		input_mt_slot(input, slot);
 		input_mt_report_slot_state(input, MT_TOOL_FINGER, touch);
 		if (touch) {
 			int x = get_unaligned_be16(&data[offset + 3]) & 0x7ff;
